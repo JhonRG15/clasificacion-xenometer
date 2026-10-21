@@ -1,0 +1,156 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Anotación Xenometer</title>
+<style>
+  :root{
+    --bg:#f4f5f7; --panel:#ffffff; --ink:#1a1d24; --muted:#5b6472; --line:#e2e5ea;
+    --brand:#1f3864; --brand-ink:#fff; --input:#fff2cc; --focus:#2563eb;
+    --neg3:#b91c1c; --neg2:#dc2626; --neg1:#f87171; --zero:#9ca3af;
+    --pos1:#86efac; --pos2:#22c55e; --pos3:#15803d; --shadow:0 1px 3px rgba(0,0,0,.08);
+  }
+  @media (prefers-color-scheme: dark){
+    :root:not([data-theme="light"]){
+      --bg:#0f1319; --panel:#171c24; --ink:#e8eaed; --muted:#9aa4b2; --line:#2a313c;
+      --brand:#2d4a7c; --input:#3a3410; --shadow:0 1px 3px rgba(0,0,0,.4);
+    }
+  }
+  :root[data-theme="dark"]{
+    --bg:#0f1319; --panel:#171c24; --ink:#e8eaed; --muted:#9aa4b2; --line:#2a313c;
+    --brand:#2d4a7c; --input:#3a3410; --shadow:0 1px 3px rgba(0,0,0,.4);
+  }
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--bg);color:var(--ink);font:15px/1.5 -apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;}
+  a{color:var(--focus)}
+  .hidden{display:none !important}
+  .wrap{max-width:860px;margin:0 auto;padding:16px}
+  button{font:inherit;cursor:pointer;border-radius:8px;border:1px solid var(--line);background:var(--panel);color:var(--ink);padding:9px 14px}
+  button:focus-visible{outline:2px solid var(--focus);outline-offset:2px}
+  .primary{background:var(--brand);color:var(--brand-ink);border-color:var(--brand);font-weight:600}
+  .ghost{background:transparent}
+  input{font:inherit;padding:10px 12px;border-radius:8px;border:1px solid var(--line);background:var(--panel);color:var(--ink);width:100%}
+  label{font-weight:600;font-size:13px;color:var(--muted);display:block;margin:12px 0 5px}
+
+  /* ---- login ---- */
+  #login{min-height:100vh;display:flex;align-items:center;justify-content:center;padding:16px}
+  .card{background:var(--panel);border:1px solid var(--line);border-radius:14px;box-shadow:var(--shadow);padding:26px;width:100%;max-width:380px}
+  .card h1{font-size:20px;margin:0 0 4px}
+  .card p.sub{color:var(--muted);margin:0 0 18px;font-size:13px}
+  .err{color:var(--neg2);font-size:13px;margin-top:10px;min-height:18px}
+
+  /* ---- top bar ---- */
+  header.bar{position:sticky;top:0;z-index:5;background:var(--panel);border-bottom:1px solid var(--line);box-shadow:var(--shadow)}
+  .bar .wrap{display:flex;align-items:center;gap:12px;padding:10px 16px}
+  .bar .who{font-weight:600}
+  .bar .who small{display:block;font-weight:400;color:var(--muted);font-size:12px}
+  .bar .spacer{flex:1}
+  .progress{height:8px;background:var(--line);border-radius:6px;overflow:hidden;flex:1;max-width:260px}
+  .progress > i{display:block;height:100%;background:var(--pos2);width:0}
+  .count{font-variant-numeric:tabular-nums;color:var(--muted);font-size:13px;white-space:nowrap}
+  .iconbtn{padding:7px 10px}
+
+  /* ---- tweet ---- */
+  .toolbar{display:flex;gap:8px;align-items:center;flex-wrap:wrap;margin:14px 0}
+  .toolbar select{font:inherit;padding:8px 10px;border-radius:8px;border:1px solid var(--line);background:var(--panel);color:var(--ink)}
+  .tw{background:var(--panel);border:1px solid var(--line);border-radius:14px;box-shadow:var(--shadow);padding:18px}
+  .tw .meta{display:flex;gap:10px;align-items:center;flex-wrap:wrap;color:var(--muted);font-size:13px;margin-bottom:10px}
+  .tw .meta .au{color:var(--ink);font-weight:600}
+  .tw .meta .chip{border:1px solid var(--line);border-radius:999px;padding:2px 9px;font-size:12px}
+  .tw .body{font-size:17px;line-height:1.55;white-space:pre-wrap;word-break:break-word}
+  .tw .quoted{margin-top:10px;border-left:3px solid var(--line);padding:6px 0 6px 12px;color:var(--muted);white-space:pre-wrap;font-size:14px}
+  .tw .foot{display:flex;gap:14px;flex-wrap:wrap;margin-top:12px;color:var(--muted);font-size:13px}
+  .tw .foot a{color:var(--muted)}
+  .sug{margin-top:12px;padding:10px 12px;border-radius:10px;background:var(--bg);border:1px dashed var(--line);font-size:13px;color:var(--muted)}
+
+  /* ---- scale ---- */
+  .scale{display:grid;grid-template-columns:repeat(7,1fr);gap:6px;margin-top:16px}
+  .scale button{padding:10px 4px;display:flex;flex-direction:column;align-items:center;gap:3px;border-width:2px;font-weight:700}
+  .scale button small{font-weight:600;font-size:10.5px;line-height:1.15;color:var(--muted);text-align:center}
+  .scale button[data-v="-3"]{border-color:var(--neg3)} .scale button[data-v="-2"]{border-color:var(--neg2)}
+  .scale button[data-v="-1"]{border-color:var(--neg1)} .scale button[data-v="0"]{border-color:var(--zero)}
+  .scale button[data-v="1"]{border-color:var(--pos1)} .scale button[data-v="2"]{border-color:var(--pos2)} .scale button[data-v="3"]{border-color:var(--pos3)}
+  .scale button.sel[data-v="-3"]{background:var(--neg3);color:#fff} .scale button.sel[data-v="-2"]{background:var(--neg2);color:#fff}
+  .scale button.sel[data-v="-1"]{background:var(--neg1);color:#111} .scale button.sel[data-v="0"]{background:var(--zero);color:#111}
+  .scale button.sel[data-v="1"]{background:var(--pos1);color:#111} .scale button.sel[data-v="2"]{background:var(--pos2);color:#fff} .scale button.sel[data-v="3"]{background:var(--pos3);color:#fff}
+  .scale button.sel small{color:inherit;opacity:.9}
+  .legend{font-size:12px;color:var(--muted);margin-top:8px}
+
+  .nav{display:flex;gap:10px;align-items:center;margin-top:16px}
+  .nav .spacer{flex:1}
+  .saved{font-size:13px;color:var(--pos2);font-weight:600}
+  .saving{color:var(--muted)}
+  .sync{font-size:12px;color:var(--muted)}
+  .sync.bad{color:var(--neg2)}
+  @media (max-width:560px){
+    .scale{grid-template-columns:repeat(4,1fr)}
+    .scale button small{display:none}
+  }
+</style>
+</head>
+<body>
+
+<!-- ===== LOGIN ===== -->
+<section id="login">
+  <form class="card" id="loginForm" autocomplete="off">
+    <h1>Anotación de tuits</h1>
+    <p class="sub">Proyecto APXML · Xenometer. Ingresa con el usuario que te asignaron.</p>
+    <label for="u">Usuario</label>
+    <input id="u" name="u" autocapitalize="none" spellcheck="false" required>
+    <label for="p">Contraseña</label>
+    <input id="p" name="p" type="password" required>
+    <div style="margin-top:18px"><button class="primary" style="width:100%" id="loginBtn" type="submit">Entrar</button></div>
+    <div class="err" id="loginErr"></div>
+  </form>
+</section>
+
+<!-- ===== APP ===== -->
+<div id="app" class="hidden">
+  <header class="bar">
+    <div class="wrap">
+      <div class="who" id="who"></div>
+      <div class="spacer"></div>
+      <div class="progress" title="Progreso"><i id="bar"></i></div>
+      <div class="count" id="count"></div>
+      <button class="iconbtn ghost" id="theme" title="Tema">◐</button>
+      <button class="iconbtn ghost" id="logout" title="Salir">Salir</button>
+    </div>
+  </header>
+
+  <main class="wrap">
+    <div class="toolbar">
+      <select id="filter">
+        <option value="all">Todos los tuits</option>
+        <option value="todo">Solo sin calificar</option>
+        <option value="hecho">Solo calificados</option>
+      </select>
+      <button id="jump" class="ghost">Ir al primero sin calificar</button>
+      <div class="spacer" style="flex:1"></div>
+      <span class="sync" id="sync"></span>
+    </div>
+
+    <article class="tw" id="card" aria-live="polite"></article>
+
+    <div class="scale" id="scale"></div>
+    <div class="legend">EyPE = extranjero o percibido como extranjero. Atajos: teclas 1–7 (de muy xenófobo a muy pro-EyPE), ← y → para navegar.</div>
+
+    <div>
+      <label for="comment">Comentario (opcional)</label>
+      <input id="comment" placeholder="Nota para el comité, contexto, dudas…">
+    </div>
+
+    <div class="nav">
+      <button id="prev" class="ghost">← Anterior</button>
+      <button id="next" class="ghost">Siguiente →</button>
+      <div class="spacer"></div>
+      <span class="saved hidden" id="saved">Guardado ✓</span>
+    </div>
+  </main>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/sql.js/1.10.3/sql-wasm.min.js"></script>
+<script src="config.js"></script>
+<script src="app.js"></script>
+</body>
+</html>
