@@ -65,12 +65,14 @@
   .sug{margin-top:12px;padding:10px 12px;border-radius:10px;background:var(--bg);border:1px dashed var(--line);font-size:13px;color:var(--muted)}
 
   /* ---- scale ---- */
-  .scale{display:grid;grid-template-columns:repeat(7,1fr);gap:6px;margin-top:16px}
+  .scale{display:grid;grid-template-columns:repeat(8,1fr);gap:6px;margin-top:16px}
   .scale button{padding:10px 4px;display:flex;flex-direction:column;align-items:center;gap:3px;border-width:2px;font-weight:700}
   .scale button small{font-weight:600;font-size:10.5px;line-height:1.15;color:var(--muted);text-align:center}
   .scale button[data-v="-3"]{border-color:var(--neg3)} .scale button[data-v="-2"]{border-color:var(--neg2)}
   .scale button[data-v="-1"]{border-color:var(--neg1)} .scale button[data-v="0"]{border-color:var(--zero)}
   .scale button[data-v="1"]{border-color:var(--pos1)} .scale button[data-v="2"]{border-color:var(--pos2)} .scale button[data-v="3"]{border-color:var(--pos3)}
+  .scale button[data-v="NA"]{border-color:var(--muted);border-style:dashed}
+  .scale button.sel[data-v="NA"]{background:var(--muted);color:#fff}
   .scale button.sel[data-v="-3"]{background:var(--neg3);color:#fff} .scale button.sel[data-v="-2"]{background:var(--neg2);color:#fff}
   .scale button.sel[data-v="-1"]{background:var(--neg1);color:#111} .scale button.sel[data-v="0"]{background:var(--zero);color:#111}
   .scale button.sel[data-v="1"]{background:var(--pos1);color:#111} .scale button.sel[data-v="2"]{background:var(--pos2);color:#fff} .scale button.sel[data-v="3"]{background:var(--pos3);color:#fff}
@@ -133,7 +135,7 @@
     <article class="tw" id="card" aria-live="polite"></article>
 
     <div class="scale" id="scale"></div>
-    <div class="legend">EyPE = extranjero o percibido como extranjero. Atajos: teclas 1–7 (de muy xenófobo a muy pro-EyPE), ← y → para navegar.</div>
+    <div class="legend">EyPE = extranjero o percibido como extranjero. «No aplica» = no clasificable (no trata de EyPE, sin contexto, otro idioma o ilegible). Atajos: teclas 1–8 (de muy xenófobo a «No aplica»), ← y → para navegar.</div>
 
     <div>
       <label for="comment">Comentario (opcional)</label>
