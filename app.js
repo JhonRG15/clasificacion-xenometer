@@ -7,14 +7,22 @@
   var URLB = (window.APPS_SCRIPT_URL || "").trim();
 
   var ESCALA = [
-    { v: -3, t: "Muy\nxenófobo", d: "Llama a la violencia contra EyPE" },
-    { v: -2, t: "Xenófobo", d: "Odio abierto o apoya lo xenófobo" },
-    { v: -1, t: "Leve", d: "Indirectamente hiriente" },
-    { v: 0, t: "Neutral", d: "Hechos o fuera de tema" },
-    { v: 1, t: "Leve pro", d: "Generalmente humanitario" },
-    { v: 2, t: "Pro-EyPE", d: "Critica la xenofobia" },
-    { v: 3, t: "Muy\npro-EyPE", d: "Llama a actuar a favor" },
-    { v: "NA", t: "No\naplica", d: "No clasificable: no trata de EyPE, sin contexto, otro idioma, ilegible" }
+    { v: -3, t: "Muy\nxenófobo", d: "Violencia o llamado explícito contra inmigrantes",
+      full: "Promueve directamente la violencia, el rechazo o medidas perjudiciales contra los inmigrantes mediante lenguaje despectivo o llamados explícitos a la acción." },
+    { v: -2, t: "Xenófobo", d: "Odio/rechazo; apoya políticas que los perjudican",
+      full: "Expresa odio o rechazo hacia grupos extranjeros, desacredita a inmigrantes o entidades que los apoyan y respalda políticas que los perjudican." },
+    { v: -1, t: "Leve", d: "Rechazo indirecto o deshumanización",
+      full: "Utiliza indirectamente expresiones o mensajes que fomentan el rechazo hacia extranjeros, promueven la deshumanización o se oponen a la ayuda humanitaria." },
+    { v: 0, t: "Neutral", d: "Hechos, estadísticas o noticias, sin comentar",
+      full: "Comparte hechos, estadísticas o noticias sobre grupos extranjeros y organizaciones o políticas relacionadas con el extranjero, pero no hace comentarios." },
+    { v: 1, t: "Leve pro", d: "A favor de la ayuda humanitaria",
+      full: "Comentarios a favor de la ayuda humanitaria." },
+    { v: 2, t: "Pro-EyPE", d: "Apoya movimientos/políticas pro extranjeros",
+      full: "Apoya abiertamente a los movimientos, políticas u organizaciones que son pro extranjeros." },
+    { v: 3, t: "Muy\npro-EyPE", d: "Llama a movilizarse contra la xenofobia",
+      full: "Llama a la movilización en contra de actos xenófobos o hace un llamado a actos que benefician a los extranjeros." },
+    { v: "NA", t: "No\naplica", d: "No clasificable",
+      full: "No clasificable: el tuit no trata de extranjeros o percibidos como extranjeros (EyPE), no tiene contexto suficiente, está en otro idioma o es ilegible." }
   ];
 
   var db = null, user = null, rows = [], idx = 0, ratings = {}, view = [];
@@ -185,11 +193,24 @@
     });
   }
 
+  // ---------- guía de calificación (modal de ayuda) ----------
+  function buildGuide() {
+    $("#guide").innerHTML = ESCALA.map(function (e) {
+      var val = e.v === "NA" ? "N/A" : (e.v > 0 ? "+" + e.v : e.v);
+      var nombre = esc(e.t).replace(/\n/g, " ");
+      return '<div class="row" data-v="' + e.v + '"><div class="val">' + val + '</div>' +
+        '<div><div class="nm">' + nombre + '</div><div class="ds">' + esc(e.full) + '</div></div></div>';
+    }).join("");
+  }
+  function openHelp(ev) { if (ev) ev.preventDefault(); $("#helpModal").classList.remove("hidden"); }
+  function closeHelp() { $("#helpModal").classList.add("hidden"); }
+
   function startApp() {
     $("#login").classList.add("hidden");
     $("#app").classList.remove("hidden");
     $("#who").innerHTML = esc(user.nombre) + "<small>" + esc(user.usuario) + " · " + esc(user.equipo === "equipo1" ? "Equipo 1" : "Equipo 2") + "</small>";
     buildScale();
+    buildGuide();
     loadAssigned();
     pullRatings().then(render);
     setInterval(flushOutbox, 30000);
@@ -219,8 +240,13 @@
     document.documentElement.setAttribute("data-theme", next);
     try { localStorage.setItem("xeno_theme", next); } catch (e) {}
   });
+  $("#help").addEventListener("click", openHelp);
+  $("#helpLink").addEventListener("click", openHelp);
+  $("#helpClose").addEventListener("click", closeHelp);
+  $("#helpModal").addEventListener("click", function (e) { if (e.target === $("#helpModal")) closeHelp(); });
   document.addEventListener("keydown", function (e) {
     if ($("#app").classList.contains("hidden")) return;
+    if (!$("#helpModal").classList.contains("hidden")) { if (e.key === "Escape") closeHelp(); return; }
     if (document.activeElement && document.activeElement.id === "comment") return;
     if (e.key >= "1" && e.key <= "8") { setRating(ESCALA[parseInt(e.key, 10) - 1].v); }
     else if (e.key === "ArrowRight") { go(1); }
